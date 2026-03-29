@@ -1,0 +1,21 @@
+{
+  "scripts": {
+    "build": "echo 'Single file — no build needed'",
+    "sync": "npx cap sync ios",
+    "open": "npx cap open ios",
+    "copy": "cp www/index.html ios/App/App/public/index.html"
+  },
+  "name": "roisdefrance",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/cli": "^6.2.1",
+    "@capacitor/core": "^6.2.1",
+    "@capacitor/ios": "^6.2.1"
+  }
+}

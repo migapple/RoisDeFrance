@@ -1,0 +1,15 @@
+{
+  "appId": "com.michel.garlandat.roisdefrance",
+  "appName": "Rois de France",
+  "webDir": "www",
+  "server": {
+    "allowNavigation": [
+      "*.wikipedia.org",
+      "apps.apple.com"
+    ]
+  },
+  "ios": {
+    "contentInset": "always",
+    "scrollEnabled": true
+  }
+}
