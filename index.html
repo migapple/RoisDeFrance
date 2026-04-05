@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Rois de France</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9993A;
+    --gold-light: #E8C76A;
+    --gold-pale: #F5E8C0;
+    --ink: #1A1209;
+    --parchment: #F9F0DC;
+    --dynasty-merov: #6B3FA0;
+    --dynasty-carol: #1A5276;
+    --dynasty-capet: #B7770D;
+    --dynasty-valois: #8B1A1A;
+    --dynasty-bourbon: #1A6B3F;
+    --dynasty-other: #4A4A4A;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bot: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    background: var(--ink);
+    color: var(--parchment);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: linear-gradient(180deg, #0D0A04 0%, #1A1209 100%);
+    border-bottom: 1px solid rgba(201,153,58,0.3);
+    padding: calc(var(--safe-top) + 10px) 16px 12px;
+  }
+  .header-top { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:6px; }
+  .fleur { font-size:18px; color:var(--gold); opacity:0.7; }
+  header h1 {
+    font-family:'IM Fell English',serif; font-size:26px; letter-spacing:0.05em;
+    background:linear-gradient(135deg,var(--gold-light) 0%,var(--gold) 40%,var(--gold-pale) 70%,var(--gold) 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1;
+  }
+  .subtitle { text-align:center; font-size:11px; letter-spacing:0.25em; text-transform:uppercase; color:rgba(201,153,58,0.45); margin-bottom:10px; font-style:italic; }
+
+  .search-wrap { position:relative; margin-bottom:8px; }
+  .search-wrap input {
+    width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(201,153,58,0.25); border-radius:8px;
+    padding:8px 12px 8px 34px; color:var(--parchment); font-family:'Cormorant Garamond',serif; font-size:15px; outline:none; transition:border-color .2s;
+  }
+  .search-wrap input::placeholder { color:rgba(245,232,192,0.3); font-style:italic; }
+  .search-wrap input:focus { border-color:var(--gold); }
+  .search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:rgba(201,153,58,0.5); font-size:14px; pointer-events:none; }
+
+  .dynasty-filters { display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+  .dynasty-filters::-webkit-scrollbar { display:none; }
+  .pill {
+    flex-shrink:0; padding:4px 11px; border-radius:20px; font-size:11px; letter-spacing:0.08em;
+    font-family:'Cormorant Garamond',serif; cursor:pointer; border:1px solid transparent;
+    transition:all .2s; user-select:none; -webkit-user-select:none;
+  }
+  .pill.all { background:rgba(201,153,58,0.12); border-color:rgba(201,153,58,0.35); color:var(--gold-light); }
+  .pill.all.active { background:var(--gold); color:var(--ink); border-color:var(--gold); font-weight:600; }
+  .pill[data-dyn="Mérovingiens"]  { background:rgba(107,63,160,0.12);  border-color:rgba(107,63,160,0.35); color:#C9A0F5; }
+  .pill[data-dyn="Mérovingiens"].active  { background:var(--dynasty-merov); color:#fff; border-color:var(--dynasty-merov); }
+  .pill[data-dyn="Carolingiens"]  { background:rgba(26,82,118,0.12);   border-color:rgba(26,82,118,0.35);  color:#7EC8E3; }
+  .pill[data-dyn="Carolingiens"].active  { background:var(--dynasty-carol); color:#fff; border-color:var(--dynasty-carol); }
+  .pill[data-dyn="Capétiens"]    { background:rgba(183,119,13,0.12);  border-color:rgba(183,119,13,0.35); color:#E8C76A; }
+  .pill[data-dyn="Capétiens"].active    { background:var(--dynasty-capet); color:var(--ink); border-color:var(--dynasty-capet); }
+  .pill[data-dyn="Valois"]       { background:rgba(139,26,26,0.12);   border-color:rgba(139,26,26,0.35);  color:#F5A0A0; }
+  .pill[data-dyn="Valois"].active       { background:var(--dynasty-valois); color:#fff; border-color:var(--dynasty-valois); }
+  .pill[data-dyn="Bourbons"]     { background:rgba(26,107,63,0.12);   border-color:rgba(26,107,63,0.35);  color:#80E0A0; }
+  .pill[data-dyn="Bourbons"].active     { background:var(--dynasty-bourbon); color:#fff; border-color:var(--dynasty-bourbon); }
+  .pill[data-dyn="Orléans"]      { background:rgba(26,107,63,0.12);   border-color:rgba(26,107,63,0.35);  color:#80E0A0; }
+  .pill[data-dyn="Orléans"].active      { background:var(--dynasty-bourbon); color:#fff; border-color:var(--dynasty-bourbon); }
+  .pill[data-dyn="Robertiens"]   { background:rgba(74,74,74,0.2);     border-color:rgba(150,150,150,0.35);color:#CCC; }
+  .pill[data-dyn="Robertiens"].active   { background:#555; color:#fff; border-color:#777; }
+
+  .count-bar { padding:7px 16px; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(201,153,58,0.4); border-bottom:1px solid rgba(201,153,58,0.07); }
+
+  .kings-list { padding:8px 12px calc(var(--safe-bot) + 20px); }
+  .dynasty-section { margin-bottom:4px; }
+  .dynasty-header { display:flex; align-items:center; gap:8px; padding:14px 4px 8px; }
+  .dynasty-line { flex:1; height:1px; background:rgba(201,153,58,0.1); }
+  .dynasty-label { font-size:10px; letter-spacing:0.3em; text-transform:uppercase; color:rgba(201,153,58,0.38); font-style:italic; }
+
+  .king-card {
+    display:flex; align-items:center; gap:14px;
+    padding:12px 14px;
+    background:rgba(255,255,255,0.025); border:1px solid rgba(201,153,58,0.1);
+    border-radius:12px; margin-bottom:8px; cursor:pointer;
+    transition:all .2s; position:relative; overflow:hidden;
+    animation:fadeUp .35s ease both;
+  }
+  .king-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
+  .king-card[data-dyn="Mérovingiens"]::before { background:var(--dynasty-merov); }
+  .king-card[data-dyn="Carolingiens"]::before { background:var(--dynasty-carol); }
+  .king-card[data-dyn="Capétiens"]::before   { background:var(--dynasty-capet); }
+  .king-card[data-dyn="Valois"]::before      { background:var(--dynasty-valois); }
+  .king-card[data-dyn="Bourbons"]::before    { background:var(--dynasty-bourbon); }
+  .king-card[data-dyn="Orléans"]::before     { background:var(--dynasty-bourbon); }
+  .king-card[data-dyn="Robertiens"]::before  { background:var(--dynasty-other); }
+  .king-card:active { transform:scale(0.985); background:rgba(255,255,255,0.05); }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── Portrait thumbnail ── */
+  .portrait-wrap {
+    width:62px; height:72px; border-radius:8px;
+    border:1px solid rgba(201,153,58,0.2); flex-shrink:0;
+    overflow:hidden; background:rgba(255,255,255,0.04);
+    position:relative;
+  }
+  .portrait-wrap img {
+    width:100%; height:100%; object-fit:cover; object-position:top center;
+    display:block; opacity:0; transition:opacity .4s; position:relative; z-index:1;
+  }
+  .portrait-wrap img.loaded { opacity:1; }
+  .portrait-placeholder {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:26px; color:rgba(201,153,58,0.22); z-index:0;
+  }
+
+  .king-info { flex:1; min-width:0; }
+  .king-num { font-size:10px; letter-spacing:0.15em; color:rgba(201,153,58,0.38); text-transform:uppercase; margin-bottom:2px; }
+  .king-name { font-family:'IM Fell English',serif; font-size:17px; color:var(--parchment); line-height:1.2; margin-bottom:3px; }
+  .king-epithet { font-style:italic; font-size:13px; color:var(--gold); margin-bottom:4px; opacity:0.85; }
+  .king-reign { font-size:12px; color:rgba(245,232,192,0.45); }
+  .king-reign span { display:inline-block; background:rgba(201,153,58,0.09); border:1px solid rgba(201,153,58,0.18); border-radius:4px; padding:1px 6px; }
+  .king-arrow { color:rgba(201,153,58,0.28); font-size:14px; flex-shrink:0; }
+
+  /* ── Modal ── */
+  .modal-backdrop {
+    position:fixed; inset:0; background:rgba(10,8,3,0.85); backdrop-filter:blur(6px);
+    z-index:200; display:flex; align-items:flex-end;
+    opacity:0; pointer-events:none; transition:opacity .25s;
+  }
+  .modal-backdrop.open { opacity:1; pointer-events:all; }
+  .modal {
+    width:100%; background:linear-gradient(180deg,#1E1507 0%,#130F04 100%);
+    border-top:1px solid rgba(201,153,58,0.3); border-radius:20px 20px 0 0;
+    padding:0 0 calc(var(--safe-bot) + 24px);
+    transform:translateY(100%); transition:transform .3s cubic-bezier(.32,.72,0,1);
+    max-height:88vh; overflow-y:auto;
+  }
+  .modal-backdrop.open .modal { transform:translateY(0); }
+  .modal-handle { width:40px; height:4px; background:rgba(201,153,58,0.28); border-radius:2px; margin:12px auto 0; }
+
+  .modal-portrait-wrap {
+    position:relative; height:240px; overflow:hidden; background:#0a0804;
+  }
+  .modal-portrait-wrap::after {
+    content:''; position:absolute; bottom:0; left:0; right:0;
+    height:80px; background:linear-gradient(transparent,#1E1507); z-index:2;
+  }
+  .modal-portrait-wrap img {
+    width:100%; height:100%; object-fit:cover; object-position:top center;
+    opacity:0; transition:opacity .5s; position:relative; z-index:1;
+  }
+  .modal-portrait-wrap img.loaded { opacity:0.82; }
+  .modal-portrait-placeholder {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:72px; opacity:0.18; z-index:0;
+  }
+  .modal-img-loading {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:3;
+  }
+  .spinner {
+    width:28px; height:28px; border:2px solid rgba(201,153,58,0.15);
+    border-top-color:rgba(201,153,58,0.55); border-radius:50%;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .modal-body { padding:0 20px; position:relative; z-index:2; margin-top:-20px; }
+  .modal-dynasty-badge {
+    display:inline-block; font-size:10px; letter-spacing:0.25em;
+    text-transform:uppercase; padding:3px 10px; border-radius:20px; margin-bottom:10px; border:1px solid;
+  }
+  .modal-name { font-family:'IM Fell English',serif; font-size:28px; line-height:1.1; color:var(--parchment); margin-bottom:4px; }
+  .modal-epithet { font-style:italic; font-size:17px; color:var(--gold); margin-bottom:16px; }
+  .modal-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  .stat-box { background:rgba(255,255,255,0.04); border:1px solid rgba(201,153,58,0.13); border-radius:10px; padding:10px 12px; }
+  .stat-label { font-size:9px; letter-spacing:0.25em; text-transform:uppercase; color:rgba(201,153,58,0.42); margin-bottom:4px; }
+  .stat-value { font-size:15px; color:var(--parchment); font-weight:300; }
+  .modal-desc { font-size:14.5px; line-height:1.7; color:rgba(245,232,192,0.68); font-style:italic; border-left:2px solid rgba(201,153,58,0.22); padding-left:14px; margin-bottom:16px; }
+  .modal-close {
+    width:100%; padding:12px; background:rgba(201,153,58,0.1); border:1px solid rgba(201,153,58,0.25);
+    border-radius:10px; color:var(--gold-light); font-family:'Cormorant Garamond',serif;
+    font-size:15px; letter-spacing:0.1em; cursor:pointer; transition:background .2s;
+  }
+  .modal-close:active { background:rgba(201,153,58,0.2); }
+
+  .empty { text-align:center; padding:60px 20px; color:rgba(201,153,58,0.28); font-style:italic; font-size:16px; }
+  .empty span { font-size:36px; display:block; margin-bottom:12px; }
+
+  ::-webkit-scrollbar { width:3px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:rgba(201,153,58,0.22); border-radius:2px; }
+
+  /* ── Gear button ── */
+  .btn-gear {
+    position:absolute; right:16px; top:calc(var(--safe-top) + 10px);
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(201,153,58,0.1); border:1px solid rgba(201,153,58,0.25);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all .2s;
+    color:rgba(201,153,58,0.7); font-size:18px;
+    -webkit-user-select:none; user-select:none;
+  }
+  .btn-gear:active { background:rgba(201,153,58,0.22); transform:rotate(45deg); }
+
+  /* ── Settings modal ── */
+  .settings-backdrop {
+    position:fixed; inset:0; background:rgba(10,8,3,0.88);
+    backdrop-filter:blur(6px); z-index:300;
+    display:flex; align-items:flex-end;
+    opacity:0; pointer-events:none; transition:opacity .25s;
+  }
+  .settings-backdrop.open { opacity:1; pointer-events:all; }
+  .settings-sheet {
+    width:100%; background:linear-gradient(180deg,#1E1507 0%,#100C03 100%);
+    border-top:1px solid rgba(201,153,58,0.35); border-radius:20px 20px 0 0;
+    padding:0 0 calc(var(--safe-bot) + 28px);
+    transform:translateY(100%); transition:transform .3s cubic-bezier(.32,.72,0,1);
+    max-height:92vh; overflow-y:auto;
+  }
+  .settings-backdrop.open .settings-sheet { transform:translateY(0); }
+
+  .settings-handle {
+    width:40px; height:4px; background:rgba(201,153,58,0.28); border-radius:2px;
+    margin:12px auto 20px; cursor:pointer; padding:10px 40px; box-sizing:content-box;
+    background-clip:content-box;
+  }
+
+  /* App identity block */
+  .settings-app-id {
+    display:flex; flex-direction:column; align-items:center;
+    padding:0 20px 20px; border-bottom:1px solid rgba(201,153,58,0.1);
+  }
+  .settings-app-icon {
+    width:64px; height:64px; border-radius:16px;
+    background:linear-gradient(135deg,#2A1F06,#1A1209);
+    border:1px solid rgba(201,153,58,0.35);
+    display:flex; align-items:center; justify-content:center;
+    font-size:32px; margin-bottom:10px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.5);
+  }
+  .settings-app-name {
+    font-family:'IM Fell English',serif; font-size:20px;
+    background:linear-gradient(135deg,var(--gold-light),var(--gold));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    margin-bottom:4px;
+  }
+  .settings-version {
+    font-size:11px; letter-spacing:0.2em; text-transform:uppercase;
+    color:rgba(201,153,58,0.4); font-style:italic;
+  }
+
+  /* Section title */
+  .settings-section-title {
+    font-size:10px; letter-spacing:0.3em; text-transform:uppercase;
+    color:rgba(201,153,58,0.38); padding:18px 20px 8px;
+    font-style:italic;
+  }
+
+  /* App row */
+  .app-row {
+    display:flex; align-items:center; gap:14px;
+    padding:11px 20px; cursor:pointer; transition:background .15s;
+  }
+  .app-row:active { background:rgba(255,255,255,0.04); }
+  .app-row-icon {
+    width:46px; height:46px; border-radius:11px; flex-shrink:0;
+    border:1px solid rgba(201,153,58,0.2);
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; background:rgba(255,255,255,0.04);
+  }
+  .app-row-info { flex:1; min-width:0; }
+  .app-row-name { font-family:'IM Fell English',serif; font-size:15px; color:var(--parchment); margin-bottom:2px; }
+  .app-row-desc { font-size:12px; color:rgba(245,232,192,0.45); font-style:italic; }
+  .app-row-arrow { color:rgba(201,153,58,0.3); font-size:14px; }
+
+  /* Divider */
+  .settings-divider { height:1px; background:rgba(201,153,58,0.08); margin:0 20px; }
+
+  /* Copyright block */
+  .settings-copyright {
+    margin:20px 20px 0;
+    background:rgba(255,255,255,0.03); border:1px solid rgba(201,153,58,0.1);
+    border-radius:12px; padding:14px 16px; text-align:center;
+  }
+  .settings-copyright p { font-size:12px; color:rgba(245,232,192,0.38); line-height:1.7; font-style:italic; }
+  .settings-copyright strong { color:rgba(201,153,58,0.6); font-weight:500; }
+  .settings-claude-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    margin-top:10px; padding:5px 12px; border-radius:20px;
+    background:rgba(100,80,200,0.12); border:1px solid rgba(100,80,200,0.3);
+    font-size:11px; color:rgba(180,160,255,0.7); letter-spacing:0.05em;
+  }
+  .settings-close {
+    width:calc(100% - 40px); margin:16px 20px 0;
+    padding:12px; background:rgba(201,153,58,0.1); border:1px solid rgba(201,153,58,0.25);
+    border-radius:10px; color:var(--gold-light);
+    font-family:'Cormorant Garamond',serif; font-size:15px; letter-spacing:0.1em;
+    cursor:pointer; transition:background .2s;
+  }
+  .settings-close:active { background:rgba(201,153,58,0.2); }
+</style>
+</head>
+<body>
+
+<header style="position:sticky;top:0;z-index:100">
+  <button class="btn-gear" onclick="openSettings()" aria-label="Paramètres">⚙</button>
+  <div class="header-top">
+    <span class="fleur">⚜</span>
+    <h1>Rois de France</h1>
+    <span class="fleur">⚜</span>
+  </div>
+  <p class="subtitle">481 — 1848 · Chronologie royale</p>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Rechercher un roi…" autocomplete="off">
+  </div>
+  <div class="dynasty-filters" id="dynastyFilters"></div>
+</header>
+
+<div class="count-bar" id="countBar"></div>
+<div class="kings-list" id="kingsList"></div>
+
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- ⚙ SETTINGS / NOS AUTRES APPS -->
+<div class="settings-backdrop" id="settingsBackdrop" onclick="closeSettings(event)">
+  <div class="settings-sheet">
+    <div class="settings-handle" onclick="closeSettings()"></div>
+
+    <!-- Identité de l'app -->
+    <div class="settings-app-id">
+      <div class="settings-app-icon">👑</div>
+      <div class="settings-app-name">Rois de France</div>
+      <div class="settings-version">Version 1.0 &nbsp;·&nbsp; 44 souverains</div>
+    </div>
+
+    <!-- Nos autres apps -->
+    <div class="settings-section-title">Nos autres applications</div>
+    
+    <div class="app-row" onclick="openAppStore('id6738601726')">
+      <div class="app-row-icon">🏛</div>
+      <div class="app-row-info">
+        <div class="app-row-name">Présidents Français</div>
+        <div class="app-row-desc">Tous les 25 presidents Francais</div>
+      </div>
+      <div class="app-row-arrow">›</div>
+    </div>
+    <div class="settings-divider"></div>
+
+    <div class="app-row" onclick="openAppStore('id6760751055')">
+      <div class="app-row-icon">🪦</div>
+      <div class="app-row-info">
+        <div class="app-row-name">Cimetières Paris</div>
+        <div class="app-row-desc">Guide des grands cimetières parisiens</div>
+      </div>
+      <div class="app-row-arrow">›</div>
+    </div>
+    <div class="settings-divider"></div>
+
+    <div class="app-row" onclick="openAppStore('id6760890465')">
+      <div class="app-row-icon">🏛</div>
+      <div class="app-row-info">
+        <div class="app-row-name">Musées Paris</div>
+        <div class="app-row-desc">Les musées de la capitale</div>
+      </div>
+      <div class="app-row-arrow">›</div>
+    </div>
+    <div class="settings-divider"></div>
+    
+    <div class="app-row" onclick="openAppStore('id6760929391')">
+      <div class="app-row-icon">🏛</div>
+      <div class="app-row-info">
+        <div class="app-row-name">Théatres Paris</div>
+        <div class="app-row-desc">Les Théatres de la capitale</div>
+      </div>
+      <div class="app-row-arrow">›</div>
+    </div>
+    <div class="settings-divider"></div>
+    
+    <div class="app-row" onclick="openAppStore('id6761293938')">
+      <div class="app-row-icon">🏛</div>
+      <div class="app-row-info">
+        <div class="app-row-name">Scènes Paris</div>
+        <div class="app-row-desc">Les grandes scènes de la capitale</div>
+      </div>
+      <div class="app-row-arrow">›</div>
+    </div>
+    <div class="settings-divider"></div>
+
+    <div class="app-row" onclick="openAppStore('id6760617965')">
+      <div class="app-row-icon">🍽</div>
+      <div class="app-row-info">
+        <div class="app-row-name">MesRestaurants</div>
+        <div class="app-row-desc">Vos restaurants favoris</div>
+      </div>
+      <div class="app-row-arrow">›</div>
+    </div>
+    <div class="settings-divider"></div>
+
+    <div class="app-row" onclick="openAppStore('id6760126279')">
+      <div class="app-row-icon">🍷</div>
+      <div class="app-row-info">
+        <div class="app-row-name">Cave Manager</div>
+        <div class="app-row-desc">Gérez votre cave à vin</div>
+      </div>
+      <div class="app-row-arrow">›</div>
+    </div>
+    <div class="settings-divider"></div>
+
+    <div class="app-row" onclick="openAppStore('id6761271324')">
+      <div class="app-row-icon">💊</div>
+      <div class="app-row-info">
+        <div class="app-row-name">Medisafe</div>
+        <div class="app-row-desc">Suivi de vos médicaments</div>
+      </div>
+      <div class="app-row-arrow">›</div>
+    </div>
+    <div class="settings-divider"></div>
+
+    <div class="app-row" onclick="openAppStore('id6759219383')">
+      <div class="app-row-icon">🥦</div>
+      <div class="app-row-info">
+        <div class="app-row-name">Frigo Manager</div>
+        <div class="app-row-desc">Zéro gaspillage alimentaire</div>
+      </div>
+      <div class="app-row-arrow">›</div>
+    </div>
+
+    <!-- Copyright -->
+    <div class="settings-copyright">
+      <p>
+        <strong>© 2026 Michel Garlandat</strong><br>
+        Tous droits réservés<br>
+        Images : Wikimedia Commons (licence libre)
+      </p>
+      <div class="settings-claude-badge">
+        ✦ &nbsp;Conçu avec Claude · Anthropic
+      </div>
+    </div>
+
+    <button class="settings-close" onclick="closeSettings()">Fermer</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  DONNÉES
+// ══════════════════════════════════════════════
+const KINGS = [
+  // ── MÉROVINGIENS ──
+  {id:1,  name:"Clovis Ier",        epithet:"le Grand",               dynasty:"Mérovingiens", start:481,  end:511,  wikiTitle:"Clovis_Ier",                 capital:"Tournai puis Paris",    desc:"Premier roi des Francs réunis, il se convertit au christianisme après la bataille de Tolbiac, fondant l'alliance durable entre l'Église et la royauté franque.",               events:"Bataille de Soissons (486) · Baptême de Reims (498)"},
+  {id:2,  name:"Clotaire Ier",      epithet:"le Vieux",               dynasty:"Mérovingiens", start:558,  end:561,  wikiTitle:"Clotaire_Ier",               capital:"Soissons",              desc:"Dernier fils de Clovis, il réunit brièvement tout le royaume franc sous son seul pouvoir après avoir éliminé ses rivaux.",                                                         events:"Réunification du royaume franc (558)"},
+  {id:3,  name:"Dagobert Ier",      epithet:"le Grand",               dynasty:"Mérovingiens", start:629,  end:639,  wikiTitle:"Dagobert_Ier",               capital:"Paris",                 desc:"Considéré comme le plus puissant des rois mérovingiens, il unifia le royaume franc et fut un grand patron des arts, notamment de l'orfèvrerie de Saint-Éloi.",                  events:"Fondation de l'abbaye de Saint-Denis (629)"},
+
+  // ── CAROLINGIENS ──
+  {id:4,  name:"Pépin le Bref",     epithet:"le Fondateur",           dynasty:"Carolingiens", start:751,  end:768,  wikiTitle:"Pépin_le_Bref",              capital:"Verberie",              desc:"Fondateur de la dynastie carolingienne, il détrôna le dernier Mérovingien et fut sacré roi par le pape Étienne II, instaurant le principe du sacre royal.",                     events:"Donation de Pépin au pape (754)"},
+  {id:5,  name:"Charlemagne",       epithet:"Père de l'Europe",       dynasty:"Carolingiens", start:768,  end:814,  wikiTitle:"Charlemagne",                capital:"Aix-la-Chapelle",       desc:"Couronné Empereur d'Occident le 25 décembre 800 par le pape Léon III, il unifia une grande partie de l'Europe occidentale et impulsa la renaissance carolingienne.",              events:"Couronnement impérial (800) · Serment de Strasbourg"},
+  {id:6,  name:"Louis Ier",         epithet:"le Pieux",               dynasty:"Carolingiens", start:814,  end:840,  wikiTitle:"Louis_Ier_(roi_des_Francs)", capital:"Aix-la-Chapelle",       desc:"Fils et successeur de Charlemagne, très pieux mais incapable d'éviter les guerres civiles entre ses fils, il dut partager l'empire à plusieurs reprises.",                       events:"Serment de Strasbourg (842)"},
+  {id:7,  name:"Charles II",        epithet:"le Chauve",              dynasty:"Carolingiens", start:843,  end:877,  wikiTitle:"Charles_II_le_Chauve",       capital:"Paris",                 desc:"Premier roi de France à proprement parler après le traité de Verdun (843), il fut également couronné Empereur d'Occident en 875.",                                                events:"Traité de Verdun (843)"},
+  {id:8,  name:"Louis II",          epithet:"le Bègue",               dynasty:"Carolingiens", start:877,  end:879,  wikiTitle:"Louis_le_Bègue",             capital:"Compiègne",             desc:"Roi au règne très court, il dut concéder de nombreux privilèges aux seigneurs et à l'Église pour obtenir leur soutien.",                                                           events:"Capitulaire de Quierzy (877)"},
+  {id:9,  name:"Charles III",       epithet:"le Simple",              dynasty:"Carolingiens", start:898,  end:922,  wikiTitle:"Charles_III_le_Simple",      capital:"Laon",                  desc:"Il céda la Normandie aux Vikings en 911 par le traité de Saint-Clair-sur-Epte, accordant ces terres à Rollon en échange de sa soumission.",                                      events:"Traité de Saint-Clair-sur-Epte (911)"},
+
+  // ── ROBERTIENS ──
+  {id:10, name:"Eudes",             epithet:"le Défenseur",           dynasty:"Robertiens",   start:888,  end:898,  wikiTitle:"Eudes_(roi_de_France)",      capital:"Paris",                 desc:"Héros du siège de Paris face aux Vikings (885-886), il fut le premier roi non carolingien, élu par les grands du royaume en raison de son prestige militaire.",                  events:"Siège de Paris par les Vikings (885-886)"},
+
+  // ── CAPÉTIENS ──
+  {id:11, name:"Hugues Capet",      epithet:"le Fondateur",           dynasty:"Capétiens",    start:987,  end:996,  wikiTitle:"Hugues_Capet",               capital:"Paris",                 desc:"Fondateur de la plus longue dynastie de l'histoire monarchique mondiale, il fut élu roi après la mort du dernier Carolingien.",                                                   events:"Élection royale (987) · Fin des Carolingiens"},
+  {id:12, name:"Robert II",         epithet:"le Pieux",               dynasty:"Capétiens",    start:996,  end:1031, wikiTitle:"Robert_II_de_France",        capital:"Paris",                 desc:"Réputé pour sa piété et sa charité, il fut excommunié pour avoir épousé sa cousine Berthe de Bourgogne, avant de se soumettre à Rome.",                                          events:"Excommunication papale (998)"},
+  {id:13, name:"Henri Ier",         epithet:"",                       dynasty:"Capétiens",    start:1031, end:1060, wikiTitle:"Henri_Ier_de_France",        capital:"Paris",                 desc:"Son règne fut marqué par de nombreux conflits avec ses vassaux, notamment Guillaume le Conquérant, duc de Normandie, futur roi d'Angleterre.",                                   events:"Défaite de Val-ès-Dunes (1047)"},
+  {id:14, name:"Philippe Ier",      epithet:"",                       dynasty:"Capétiens",    start:1060, end:1108, wikiTitle:"Philippe_Ier_de_France",     capital:"Paris",                 desc:"Excommunié par le pape pour son remariage, il ne participa pas à la Première Croisade mais renforça le domaine royal capétien.",                                                 events:"Première Croisade (1095) sans le roi"},
+  {id:15, name:"Louis VI",          epithet:"le Gros",                dynasty:"Capétiens",    start:1108, end:1137, wikiTitle:"Louis_VI_de_France",         capital:"Paris",                 desc:"Infatigable guerrier, il consolida l'autorité royale dans le domaine royal et s'appuya sur l'abbé Suger pour administrer le royaume.",                                           events:"Bataille de Brémule (1119)"},
+  {id:16, name:"Louis VII",         epithet:"le Jeune",               dynasty:"Capétiens",    start:1137, end:1180, wikiTitle:"Louis_VII_de_France",        capital:"Paris",                 desc:"Époux d'Aliénor d'Aquitaine qu'il répudia, la perdant au profit d'Henri II Plantagenêt, il participa à la Deuxième Croisade qui tourna au désastre.",                            events:"Divorce avec Aliénor (1152) · 2ᵉ Croisade (1147)"},
+  {id:17, name:"Philippe II",       epithet:"Auguste",                dynasty:"Capétiens",    start:1180, end:1223, wikiTitle:"Philippe_II_de_France",      capital:"Paris",                 desc:"Il triompha à Bouvines (1214), récupéra la Normandie sur l'Angleterre et doubla le domaine royal, devenant le plus puissant monarque d'Occident.",                               events:"Bataille de Bouvines (1214) · 3ᵉ Croisade"},
+  {id:18, name:"Louis VIII",        epithet:"le Lion",                dynasty:"Capétiens",    start:1223, end:1226, wikiTitle:"Louis_VIII_de_France",       capital:"Paris",                 desc:"Règne de seulement trois ans, mais il mena la croisade contre les Albigeois et conquit le Poitou et une partie de la Gascogne sur l'Angleterre.",                                events:"Croisade des Albigeois (1226)"},
+  {id:19, name:"Louis IX",          epithet:"Saint Louis",            dynasty:"Capétiens",    start:1226, end:1270, wikiTitle:"Louis_IX_de_France",         capital:"Paris",                 desc:"Canonisé en 1297, il incarna l'idéal du roi chrétien. Il mena deux croisades, fit construire la Sainte-Chapelle et consolida la justice royale.",                                events:"Sainte-Chapelle (1248) · 7ᵉ Croisade · Mort à Tunis (1270)"},
+  {id:20, name:"Philippe III",      epithet:"le Hardi",               dynasty:"Capétiens",    start:1270, end:1285, wikiTitle:"Philippe_III_de_France",     capital:"Paris",                 desc:"Fils de Saint Louis, il agrandit considérablement le domaine royal par héritages et acquisitions, notamment le comté de Toulouse.",                                               events:"Vêpres siciliennes (1282)"},
+  {id:21, name:"Philippe IV",       epithet:"le Bel",                 dynasty:"Capétiens",    start:1285, end:1314, wikiTitle:"Philippe_IV_de_France",      capital:"Paris",                 desc:"Roi autoritaire et réformateur, il entra en conflit avec le pape Boniface VIII, supprima l'ordre des Templiers (1307) et réunit les premiers États généraux.",                   events:"Suppression des Templiers (1307) · États généraux (1302)"},
+  {id:22, name:"Louis X",           epithet:"le Hutin",               dynasty:"Capétiens",    start:1314, end:1316, wikiTitle:"Louis_X_de_France",          capital:"Paris",                 desc:"Roi irascible, il mourut après seulement deux ans de règne. Il fut le premier roi à avoir aboli le servage en France.",                                                           events:"Abolition du servage (1315)"},
+  {id:23, name:"Philippe V",        epithet:"le Long",                dynasty:"Capétiens",    start:1316, end:1322, wikiTitle:"Philippe_V_de_France",       capital:"Paris",                 desc:"Premier roi à invoquer la loi salique pour exclure les femmes du trône, il réorganisa l'administration royale et unifia les poids et mesures.",                                  events:"Application de la loi salique"},
+  {id:24, name:"Charles IV",        epithet:"le Bel",                 dynasty:"Capétiens",    start:1322, end:1328, wikiTitle:"Charles_IV_de_France",       capital:"Paris",                 desc:"Dernier Capétien direct, sa mort sans héritier mâle provoqua la succession de Philippe VI de Valois et déclencha à terme la guerre de Cent Ans.",                                events:"Fin des Capétiens directs (1328)"},
+
+  // ── VALOIS ──
+  {id:25, name:"Philippe VI",       epithet:"de Valois",              dynasty:"Valois",       start:1328, end:1350, wikiTitle:"Philippe_VI_de_France",      capital:"Paris",                 desc:"Premier roi Valois, son règne fut marqué par la défaite de Crécy (1346) et la dévastation de la Peste Noire qui tua un tiers de la population.",                                 events:"Bataille de Crécy (1346) · Peste Noire (1347)"},
+  {id:26, name:"Jean II",           epithet:"le Bon",                 dynasty:"Valois",       start:1350, end:1364, wikiTitle:"Jean_II_de_France",          capital:"Paris",                 desc:"Fait prisonnier à Poitiers (1356), il dut signer le traité de Brétigny cédant un tiers de la France à l'Angleterre. Il mourut en captivité à Londres.",                          events:"Bataille de Poitiers (1356) · Captivité à Londres"},
+  {id:27, name:"Charles V",         epithet:"le Sage",                dynasty:"Valois",       start:1364, end:1380, wikiTitle:"Charles_V_de_France",        capital:"Paris",                 desc:"Souverain lettré et fin politique, il reconquérit avec Du Guesclin la majeure partie des territoires perdus et créa la Bibliothèque royale.",                                     events:"Reconquête du Poitou (1372) · Bibliothèque royale"},
+  {id:28, name:"Charles VI",        epithet:"le Fol",                 dynasty:"Valois",       start:1380, end:1422, wikiTitle:"Charles_VI_de_France",       capital:"Paris",                 desc:"Atteint de troubles mentaux sévères à partir de 1392, son règne sombra dans la guerre civile entre Armagnacs et Bourguignons, permettant la reconquête anglaise.",                events:"Défaite d'Azincourt (1415) · Traité de Troyes (1420)"},
+  {id:29, name:"Charles VII",       epithet:"le Victorieux",          dynasty:"Valois",       start:1422, end:1461, wikiTitle:"Charles_VII_de_France",      capital:"Bourges puis Paris",    desc:"Sauvé par Jeanne d'Arc qui obtint son sacre à Reims (1429), il finit par chasser les Anglais et mit fin à la guerre de Cent Ans en 1453.",                                       events:"Jeanne d'Arc (1429) · Fin guerre de Cent Ans (1453)"},
+  {id:30, name:"Louis XI",          epithet:"l'Universelle Aragne",   dynasty:"Valois",       start:1461, end:1483, wikiTitle:"Louis_XI",                   capital:"Plessis-lès-Tours",     desc:"Roi araignée au génie politique redoutable, il vainquit la Ligue du Bien Public et intégra la Bourgogne à la France après la mort de Charles le Téméraire.",                     events:"Mort de Charles le Téméraire (1477) · Annexion Bourgogne"},
+  {id:31, name:"Charles VIII",      epithet:"l'Affable",              dynasty:"Valois",       start:1483, end:1498, wikiTitle:"Charles_VIII_de_France",     capital:"Paris",                 desc:"Il lança les guerres d'Italie (1494) pour revendiquer Naples, introduisant en France l'art de la Renaissance italienne. Il mourut d'un accident à 27 ans.",                      events:"Début guerres d'Italie (1494) · Anne de Bretagne"},
+  {id:32, name:"Louis XII",         epithet:"Père du Peuple",         dynasty:"Valois",       start:1498, end:1515, wikiTitle:"Louis_XII",                  capital:"Blois",                 desc:"Surnommé « Père du Peuple » pour sa fiscalité modérée, il poursuivit les guerres d'Italie mais dut y renoncer. Son règne fut prospère et populaire.",                           events:"Guerres d'Italie · Rattachement de la Bretagne"},
+  {id:33, name:"François Ier",      epithet:"le Roi-Chevalier",       dynasty:"Valois",       start:1515, end:1547, wikiTitle:"François_Ier_de_France",     capital:"Paris / Fontainebleau", desc:"Symbole de la Renaissance française, il vainquit à Marignan (1515), fonda le Collège de France, construisit Chambord et attira Léonard de Vinci en France.",                     events:"Bataille de Marignan (1515) · Léonard de Vinci (1516)"},
+  {id:34, name:"Henri II",          epithet:"",                       dynasty:"Valois",       start:1547, end:1559, wikiTitle:"Henri_II_de_France",         capital:"Paris",                 desc:"Époux de Catherine de Médicis, il récupéra Metz, Toul et Verdun sur l'Empire. Il mourut tragiquement lors d'un tournoi, d'un éclat de lance dans l'œil.",                       events:"Paix de Cateau-Cambrésis (1559) · Mort en tournoi"},
+  {id:35, name:"Charles IX",        epithet:"",                       dynasty:"Valois",       start:1560, end:1574, wikiTitle:"Charles_IX_de_France",       capital:"Paris",                 desc:"Sous la tutelle de sa mère Catherine de Médicis, son règne fut marqué par les guerres de Religion et le massacre de la Saint-Barthélemy (1572).",                                events:"Massacre de la Saint-Barthélemy (24 août 1572)"},
+  {id:36, name:"Henri III",         epithet:"",                       dynasty:"Valois",       start:1574, end:1589, wikiTitle:"Henri_III_de_France",        capital:"Paris",                 desc:"Dernier des Valois, il fit assassiner les Guises et fut lui-même poignardé par le moine Jacques Clément. Il désigna Henri de Navarre comme successeur.",                         events:"Assassinat des Guises (1588) · Assassinat du roi (1589)"},
+
+  // ── BOURBONS ──
+  {id:37, name:"Henri IV",          epithet:"le Grand / Vert-Galant", dynasty:"Bourbons",     start:1589, end:1610, wikiTitle:"Henri_IV_de_France",         capital:"Paris",                 desc:"Premier roi Bourbon, il mit fin aux guerres de Religion par l'Édit de Nantes (1598). Populaire et pragmatique, il fut assassiné par Ravaillac en 1610.",                        events:"Édit de Nantes (1598) · Assassinat par Ravaillac (1610)"},
+  {id:38, name:"Louis XIII",        epithet:"le Juste",               dynasty:"Bourbons",     start:1610, end:1643, wikiTitle:"Louis_XIII",                 capital:"Paris",                 desc:"Son règne fut dominé par le cardinal de Richelieu qui affirma le pouvoir absolu, réprima la Fronde protestante et orienta la France vers la guerre de Trente Ans.",               events:"Prise de La Rochelle (1628) · Richelieu Premier ministre"},
+  {id:39, name:"Louis XIV",         epithet:"le Roi-Soleil",          dynasty:"Bourbons",     start:1643, end:1715, wikiTitle:"Louis_XIV",                  capital:"Versailles",            desc:"Le plus long règne de l'histoire de France (72 ans). Il incarna la monarchie absolue, construisit Versailles et révoqua l'Édit de Nantes en 1685.",                              events:"Construction Versailles · Révocation Édit Nantes (1685)"},
+  {id:40, name:"Louis XV",          epithet:"le Bien-Aimé",           dynasty:"Bourbons",     start:1715, end:1774, wikiTitle:"Louis_XV",                   capital:"Versailles",            desc:"D'abord « Bien-Aimé », il finit impopulaire. Il perdit le Canada face aux Anglais mais acquit la Lorraine et la Corse.",                                                          events:"Perte du Canada (1763) · Acquisition de la Corse (1768)"},
+  {id:41, name:"Louis XVI",         epithet:"",                       dynasty:"Bourbons",     start:1774, end:1792, wikiTitle:"Louis_XVI",                  capital:"Versailles puis Paris", desc:"Monarque réformateur mais indécis, il convoqua les États généraux face à la crise financière. La Révolution éclata en 1789 et il fut guillotiné le 21 janvier 1793.",              events:"Révolution française (1789) · Exécution (21 jan. 1793)"},
+  {id:42, name:"Louis XVIII",       epithet:"",                       dynasty:"Bourbons",     start:1814, end:1824, wikiTitle:"Louis_XVIII",                capital:"Paris",                 desc:"Frère de Louis XVI, il régna après la chute de Napoléon. Monarque constitutionnel pragmatique, il accepta la Charte de 1814 garantissant les libertés fondamentales.",            events:"Restauration (1814) · Charte constitutionnelle (1814)"},
+  {id:43, name:"Charles X",         epithet:"",                       dynasty:"Bourbons",     start:1824, end:1830, wikiTitle:"Charles_X",                  capital:"Paris",                 desc:"Dernier roi Bourbon, ultra-royaliste, ses Ordonnances de juillet 1830 déclenchèrent la révolution des Trois Glorieuses qui l'obligèrent à abdiquer.",                              events:"Les Trois Glorieuses (27-29 juillet 1830)"},
+
+  // ── ORLÉANS ──
+  {id:44, name:"Louis-Philippe Ier", epithet:"le Roi-Citoyen",        dynasty:"Orléans",      start:1830, end:1848, wikiTitle:"Louis-Philippe_Ier",         capital:"Paris",                 desc:"Dernier roi des Français, il régna sous la Monarchie de Juillet. La révolution de 1848 mit fin à son règne et instaura la IIᵉ République.",                                     events:"Conquête de l'Algérie (1830) · Révolution de 1848"},
+];
+
+const DYNASTY_COLORS = {
+  "Mérovingiens": {bg:"rgba(107,63,160,0.15)", border:"rgba(107,63,160,0.4)", text:"#C9A0F5"},
+  "Carolingiens": {bg:"rgba(26,82,118,0.15)",  border:"rgba(26,82,118,0.4)",  text:"#7EC8E3"},
+  "Robertiens":   {bg:"rgba(90,90,90,0.15)",   border:"rgba(90,90,90,0.4)",   text:"#CCC"},
+  "Capétiens":    {bg:"rgba(183,119,13,0.15)", border:"rgba(183,119,13,0.4)", text:"#E8C76A"},
+  "Valois":       {bg:"rgba(139,26,26,0.15)",  border:"rgba(139,26,26,0.4)",  text:"#F5A0A0"},
+  "Bourbons":     {bg:"rgba(26,107,63,0.15)",  border:"rgba(26,107,63,0.4)",  text:"#80E0A0"},
+  "Orléans":      {bg:"rgba(26,107,63,0.15)",  border:"rgba(26,107,63,0.4)",  text:"#80E0A0"},
+};
+
+// ══════════════════════════════════════════════
+//  WIKIPEDIA IMAGE LOADER — avec cache localStorage
+//  (même pattern que Cimetières Paris)
+// ══════════════════════════════════════════════
+const CACHE_PFX = "rois_img_";
+const CACHE_TTL  = 7 * 24 * 3600 * 1000; // 7 jours
+
+function getCached(title) {
+  try {
+    const raw = localStorage.getItem(CACHE_PFX + title);
+    if (!raw) return null;
+    const {url, ts} = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) { localStorage.removeItem(CACHE_PFX + title); return null; }
+    return url;
+  } catch(e) { return null; }
+}
+
+function setCached(title, url) {
+  try { localStorage.setItem(CACHE_PFX + title, JSON.stringify({url, ts:Date.now()})); } catch(e) {}
+}
+
+async function getWikiImg(wikiTitle) {
+  const cached = getCached(wikiTitle);
+  if (cached) return cached;
+  try {
+    const r = await fetch(
+      `https://fr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`,
+      {headers:{"Accept":"application/json"}}
+    );
+    if (!r.ok) return null;
+    const d = await r.json();
+    const url = d.thumbnail?.source || d.originalimage?.source || null;
+    if (url) setCached(wikiTitle, url);
+    return url;
+  } catch(e) { return null; }
+}
+
+function applyPortrait(wikiTitle, imgEl) {
+  if (!imgEl) return;
+  getWikiImg(wikiTitle).then(url => {
+    if (!url || !imgEl) return;
+    imgEl.src = url;
+    imgEl.onload  = () => imgEl.classList.add("loaded");
+    imgEl.onerror = () => { imgEl.style.display = "none"; };
+  });
+}
+
+// ══════════════════════════════════════════════
+//  UI
+// ══════════════════════════════════════════════
+let activeDynasty = "Tous";
+let searchQuery   = "";
+
+function buildFilters() {
+  const dynasties = ["Tous", ...new Set(KINGS.map(k => k.dynasty))];
+  const c = document.getElementById("dynastyFilters");
+  c.innerHTML = "";
+  dynasties.forEach(d => {
+    const p = document.createElement("button");
+    p.className = "pill" + (d==="Tous"?" all":"") + (d===activeDynasty?" active":"");
+    if (d !== "Tous") p.dataset.dyn = d;
+    p.textContent = d;
+    p.onclick = () => { activeDynasty = d; buildFilters(); renderList(); };
+    c.appendChild(p);
+  });
+}
+
+function norm(s) { return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
+
+function renderList() {
+  const list = document.getElementById("kingsList");
+  const q = norm(searchQuery).trim();
+
+  const filtered = KINGS.filter(k => {
+    if (activeDynasty !== "Tous" && k.dynasty !== activeDynasty) return false;
+    if (q) return norm(k.name + " " + k.epithet).includes(q);
+    return true;
+  });
+
+  document.getElementById("countBar").textContent =
+    filtered.length === KINGS.length
+      ? `${KINGS.length} souverains · de Clovis Ier à Louis-Philippe Ier`
+      : `${filtered.length} résultat${filtered.length > 1 ? "s" : ""}`;
+
+  list.innerHTML = "";
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty"><span>👑</span>Aucun roi trouvé</div>`;
+    return;
+  }
+
+  const showGroups = activeDynasty === "Tous" && !q;
+  if (showGroups) {
+    const groups = {};
+    filtered.forEach(k => { if (!groups[k.dynasty]) groups[k.dynasty]=[]; groups[k.dynasty].push(k); });
+    Object.entries(groups).forEach(([dyn, kings]) => {
+      const sec = document.createElement("div");
+      sec.className = "dynasty-section";
+      sec.innerHTML = `<div class="dynasty-header"><div class="dynasty-line"></div><span class="dynasty-label">${dyn}</span><div class="dynasty-line"></div></div>`;
+      kings.forEach((k,i) => sec.appendChild(buildCard(k,i)));
+      list.appendChild(sec);
+    });
+  } else {
+    filtered.forEach((k,i) => list.appendChild(buildCard(k,i)));
+  }
+}
+
+function buildCard(k, idx) {
+  const card = document.createElement("div");
+  card.className = "king-card";
+  card.dataset.dyn = k.dynasty;
+  card.style.animationDelay = (idx * 0.03) + "s";
+  const dur = k.end - k.start;
+
+  card.innerHTML = `
+    <div class="portrait-wrap">
+      <div class="portrait-placeholder">👑</div>
+      <img alt="${k.name}" loading="lazy">
+    </div>
+    <div class="king-info">
+      <div class="king-num">Nº ${k.id}</div>
+      <div class="king-name">${k.name}</div>
+      ${k.epithet ? `<div class="king-epithet">${k.epithet}</div>` : ""}
+      <div class="king-reign"><span>${k.start} – ${k.end}</span> &nbsp;·&nbsp; ${dur} an${dur>1?"s":""}</div>
+    </div>
+    <div class="king-arrow">›</div>
+  `;
+
+  applyPortrait(k.wikiTitle, card.querySelector("img"));
+  card.onclick = () => openModal(k);
+  return card;
+}
+
+function openModal(k) {
+  const dc = DYNASTY_COLORS[k.dynasty] || DYNASTY_COLORS["Capétiens"];
+  const dur = k.end - k.start;
+
+  document.getElementById("modalContent").innerHTML = `
+    <div class="modal-portrait-wrap">
+      <div class="modal-img-loading" id="mSpinner"><div class="spinner"></div></div>
+      <div class="modal-portrait-placeholder" id="mPh">👑</div>
+      <img id="mImg" alt="${k.name}">
+    </div>
+    <div class="modal-body">
+      <div class="modal-dynasty-badge" style="background:${dc.bg};border-color:${dc.border};color:${dc.text};">${k.dynasty}</div>
+      <div class="modal-name">${k.name}</div>
+      ${k.epithet ? `<div class="modal-epithet">${k.epithet}</div>` : `<div style="margin-bottom:16px"></div>`}
+      <div class="modal-stats">
+        <div class="stat-box"><div class="stat-label">Début de règne</div><div class="stat-value">${k.start}</div></div>
+        <div class="stat-box"><div class="stat-label">Fin de règne</div><div class="stat-value">${k.end}</div></div>
+        <div class="stat-box"><div class="stat-label">Durée</div><div class="stat-value">${dur} an${dur>1?"s":""}</div></div>
+        <div class="stat-box"><div class="stat-label">Capitale</div><div class="stat-value" style="font-size:13px">${k.capital||"—"}</div></div>
+      </div>
+      ${k.desc  ? `<p class="modal-desc">${k.desc}</p>` : ""}
+      ${k.events? `<div class="stat-box" style="margin-bottom:16px"><div class="stat-label">Événements clés</div><div class="stat-value" style="font-size:13px;line-height:1.6">${k.events}</div></div>` : ""}
+      <button class="modal-close" onclick="closeModal()">⚜ Fermer ⚜</button>
+    </div>
+  `;
+
+  // Load portrait for modal
+  getWikiImg(k.wikiTitle).then(url => {
+    const spinner = document.getElementById("mSpinner");
+    const ph      = document.getElementById("mPh");
+    const img     = document.getElementById("mImg");
+    if (spinner) spinner.style.display = "none";
+    if (url && img) {
+      img.src = url;
+      img.onload  = () => { img.classList.add("loaded"); if(ph) ph.style.display="none"; };
+      img.onerror = () => { img.style.display = "none"; };
+    }
+  });
+
+  document.getElementById("modalBackdrop").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById("modalBackdrop")) return;
+  document.getElementById("modalBackdrop").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("searchInput").addEventListener("input", function() {
+  searchQuery = this.value;
+  renderList();
+});
+
+// ── SETTINGS ──
+function openSettings() {
+  document.getElementById("settingsBackdrop").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeSettings(e) {
+  if (e && e.target !== document.getElementById("settingsBackdrop")) return;
+  document.getElementById("settingsBackdrop").classList.remove("open");
+  document.body.style.overflow = "";
+}
+function openAppStore(appId) {
+  window.location.href = `https://apps.apple.com/fr/app/${appId}`;
+}
+
+buildFilters();
+renderList();
+</script>
+</body>
+</html>
