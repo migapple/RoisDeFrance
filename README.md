@@ -1,6 +1,8 @@
 # RoisDeFrance
 Tous les rois de France
 
+# 1.2 Version bilingue
+
 # 1.1 Supression des zones blanches pendant le scroll
 
 Découvrez l'histoire de France à travers ses 44 souverains, de Clovis Ier (481) à Louis-Philippe Ier (1848).
