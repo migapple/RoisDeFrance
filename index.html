@@ -202,7 +202,7 @@
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:rgba(201,153,58,0.22); border-radius:2px; }
 
-  /* ── Gear button ── */
+  /* ── Gear + Lang buttons ── */
   .btn-gear {
     position:absolute; right:16px; top:calc(var(--safe-top) + 10px);
     width:36px; height:36px; border-radius:50%;
@@ -213,6 +213,15 @@
     -webkit-user-select:none; user-select:none;
   }
   .btn-gear:active { background:rgba(201,153,58,0.22); transform:rotate(45deg); }
+  .btn-lang {
+    position:absolute; left:16px; top:calc(var(--safe-top) + 10px);
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(201,153,58,0.1); border:1px solid rgba(201,153,58,0.25);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all .2s; font-size:20px; line-height:1;
+    -webkit-user-select:none; user-select:none;
+  }
+  .btn-lang:active { background:rgba(201,153,58,0.22); transform:scale(0.88); }
 
   /* ── Settings modal ── */
   .settings-backdrop {
@@ -315,13 +324,14 @@
 <body>
 
 <header style="position:sticky;top:0;z-index:100">
+  <button class="btn-lang" id="btnLang" onclick="toggleLang()">🇫🇷</button>
   <button class="btn-gear" onclick="openSettings()" aria-label="Paramètres">⚙</button>
   <div class="header-top">
     <span class="fleur">⚜</span>
-    <h1>Rois de France</h1>
+    <h1 id="appTitle">Rois de France</h1>
     <span class="fleur">⚜</span>
   </div>
-  <p class="subtitle">481 — 1848 · Chronologie royale</p>
+  <p class="subtitle" id="appSubtitle">481 — 1848 · Chronologie royale</p>
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
     <input type="text" id="searchInput" placeholder="Rechercher un roi…" autocomplete="off">
@@ -347,115 +357,85 @@
     <!-- Identité de l'app -->
     <div class="settings-app-id">
       <div class="settings-app-icon">👑</div>
-      <div class="settings-app-name">Rois de France</div>
-      <div class="settings-version">Version 1.0 &nbsp;·&nbsp; 44 souverains</div>
+      <div class="settings-app-name" id="settingsAppName">Rois de France</div>
+      <div class="settings-version" id="settingsVersion">Version 1.0 &nbsp;·&nbsp; 44 souverains</div>
     </div>
 
     <!-- Nos autres apps -->
-    <div class="settings-section-title">Nos autres applications</div>
-    
-    <div class="app-row" onclick="openAppStore('id6738601726')">
-      <div class="app-row-icon">🏛</div>
-      <div class="app-row-info">
-        <div class="app-row-name">Présidents Français</div>
-        <div class="app-row-desc">Tous les 25 presidents Francais</div>
-      </div>
-      <div class="app-row-arrow">›</div>
-    </div>
-    <div class="settings-divider"></div>
+    <div class="settings-section-title" id="settingsSectionTitle">Nos autres applications</div>
 
-    <div class="app-row" onclick="openAppStore('id6760751055')">
+    <div class="app-row" onclick="openAppStore('id6738601726')">
       <div class="app-row-icon">🪦</div>
       <div class="app-row-info">
         <div class="app-row-name">Cimetières Paris</div>
-        <div class="app-row-desc">Guide des grands cimetières parisiens</div>
+        <div class="app-row-desc" id="descCimetieres">Guide des grands cimetières parisiens</div>
       </div>
       <div class="app-row-arrow">›</div>
     </div>
     <div class="settings-divider"></div>
 
-    <div class="app-row" onclick="openAppStore('id6760890465')">
+    <div class="app-row" onclick="openAppStore('id6743158361')">
       <div class="app-row-icon">🏛</div>
       <div class="app-row-info">
         <div class="app-row-name">Musées Paris</div>
-        <div class="app-row-desc">Les musées de la capitale</div>
-      </div>
-      <div class="app-row-arrow">›</div>
-    </div>
-    <div class="settings-divider"></div>
-    
-    <div class="app-row" onclick="openAppStore('id6760929391')">
-      <div class="app-row-icon">🏛</div>
-      <div class="app-row-info">
-        <div class="app-row-name">Théatres Paris</div>
-        <div class="app-row-desc">Les Théatres de la capitale</div>
-      </div>
-      <div class="app-row-arrow">›</div>
-    </div>
-    <div class="settings-divider"></div>
-    
-    <div class="app-row" onclick="openAppStore('id6761293938')">
-      <div class="app-row-icon">🏛</div>
-      <div class="app-row-info">
-        <div class="app-row-name">Scènes Paris</div>
-        <div class="app-row-desc">Les grandes scènes de la capitale</div>
+        <div class="app-row-desc" id="descMusees">Les musées de la capitale</div>
       </div>
       <div class="app-row-arrow">›</div>
     </div>
     <div class="settings-divider"></div>
 
-    <div class="app-row" onclick="openAppStore('id6760617965')">
+    <div class="app-row" onclick="openAppStore('id6504267617')">
       <div class="app-row-icon">🍽</div>
       <div class="app-row-info">
         <div class="app-row-name">MesRestaurants</div>
-        <div class="app-row-desc">Vos restaurants favoris</div>
+        <div class="app-row-desc" id="descRestaurants">Vos restaurants favoris</div>
       </div>
       <div class="app-row-arrow">›</div>
     </div>
     <div class="settings-divider"></div>
 
-    <div class="app-row" onclick="openAppStore('id6760126279')">
+    <div class="app-row" onclick="openAppStore('id6478837462')">
       <div class="app-row-icon">🍷</div>
       <div class="app-row-info">
         <div class="app-row-name">Cave Manager</div>
-        <div class="app-row-desc">Gérez votre cave à vin</div>
+        <div class="app-row-desc" id="descCave">Gérez votre cave à vin</div>
       </div>
       <div class="app-row-arrow">›</div>
     </div>
     <div class="settings-divider"></div>
 
-    <div class="app-row" onclick="openAppStore('id6761271324')">
+    <div class="app-row" onclick="openAppStore('id6476972965')">
       <div class="app-row-icon">💊</div>
       <div class="app-row-info">
-        <div class="app-row-name">Medisafe</div>
-        <div class="app-row-desc">Suivi de vos médicaments</div>
+        <div class="app-row-name">MediManager</div>
+        <div class="app-row-desc" id="descMedi">Suivi de vos médicaments</div>
       </div>
       <div class="app-row-arrow">›</div>
     </div>
     <div class="settings-divider"></div>
 
-    <div class="app-row" onclick="openAppStore('id6759219383')">
+    <div class="app-row" onclick="openAppStore('id6478837462')">
       <div class="app-row-icon">🥦</div>
       <div class="app-row-info">
         <div class="app-row-name">Frigo Manager</div>
-        <div class="app-row-desc">Zéro gaspillage alimentaire</div>
+        <div class="app-row-desc" id="descFrigo">Zéro gaspillage alimentaire</div>
       </div>
       <div class="app-row-arrow">›</div>
     </div>
 
     <!-- Copyright -->
     <div class="settings-copyright">
-      <p>
-        <strong>© 2026 Michel Garlandat</strong><br>
-        Tous droits réservés<br>
+      <p id="settingsCopyright">
+        <strong>© 2025 Michel Garlandat</strong><br>
+        Version 1.2<br>
         Images : Wikimedia Commons (licence libre)
       </p>
-      <div class="settings-claude-badge">
+      <div class="settings-claude-badge" id="settingsClaudeBadge">
         ✦ &nbsp;Conçu avec Claude · Anthropic
       </div>
     </div>
 
-    <button class="settings-close" onclick="closeSettings()">Fermer</button>
+    <button class="settings-close" id="settingsCloseBtn" onclick="closeSettings()">Fermer</button>
   </div>
 </div>
 
@@ -581,12 +561,131 @@ function applyPortrait(wikiTitle, imgEl) {
 }
 
 // ══════════════════════════════════════════════
-//  UI
+//  LANGUE & TRADUCTIONS
+// ══════════════════════════════════════════════
+let lang = 'fr';
+
+const I18N = {
+  fr: {
+    title:       "Rois de France",
+    subtitle:    "481 — 1848 · Chronologie royale",
+    placeholder: "Rechercher un roi…",
+    all:         "Tous",
+    sovereigns:  (n) => `${n} souverain${n>1?'s':''} · de Clovis Ier à Louis-Philippe Ier`,
+    results:     (n) => `${n} résultat${n>1?'s':''}`,
+    empty:       "Aucun roi trouvé",
+    num:         "Nº",
+    reignStart:  "Début de règne",
+    reignEnd:    "Fin de règne",
+    duration:    "Durée",
+    capital:     "Capitale",
+    keyEvents:   "Événements clés",
+    years:       (n) => `${n} an${n>1?'s':''}`,
+    close:       "⚜ Fermer ⚜",
+    version:     "Version 1.0 · 44 souverains",
+    otherApps:   "Nos autres applications",
+    copyright:   "<strong>© 2025 Michel Garlandat</strong><br>Tous droits réservés<br>Images : Wikimedia Commons (licence libre)",
+    madeWith:    "✦ &nbsp;Conçu avec Claude · Anthropic",
+    closeBtn:    "Fermer",
+    descCimetieres: "Guide des grands cimetières parisiens",
+    descMusees:     "Les musées de la capitale",
+    descRestaurants:"Vos restaurants favoris",
+    descCave:       "Gérez votre cave à vin",
+    descMedi:       "Suivi de vos médicaments",
+    descFrigo:      "Zéro gaspillage alimentaire",
+  },
+  en: {
+    title:       "Kings of France",
+    subtitle:    "481 — 1848 · Royal Chronology",
+    placeholder: "Search a king…",
+    all:         "All",
+    sovereigns:  (n) => `${n} sovereign${n>1?'s':''} · from Clovis I to Louis-Philippe I`,
+    results:     (n) => `${n} result${n>1?'s':''}`,
+    empty:       "No king found",
+    num:         "N°",
+    reignStart:  "Reign start",
+    reignEnd:    "Reign end",
+    duration:    "Duration",
+    capital:     "Capital",
+    keyEvents:   "Key events",
+    years:       (n) => `${n} year${n>1?'s':''}`,
+    close:       "⚜ Close ⚜",
+    version:     "Version 1.0 · 44 sovereigns",
+    otherApps:   "Our other apps",
+    copyright:   "<strong>© 2025 Michel Garlandat</strong><br>All rights reserved<br>Images: Wikimedia Commons (free licence)",
+    madeWith:    "✦ &nbsp;Built with Claude · Anthropic",
+    closeBtn:    "Close",
+    descCimetieres: "Guide to Paris's great cemeteries",
+    descMusees:     "Museums of the French capital",
+    descRestaurants:"Your favourite restaurants",
+    descCave:       "Manage your wine cellar",
+    descMedi:       "Track your medications",
+    descFrigo:      "Zero food waste",
+  }
+};
+
+const DYNASTY_EN = {
+  "Mérovingiens":"Merovingians", "Carolingiens":"Carolingians",
+  "Robertiens":"Robertians",     "Capétiens":"Capetians",
+  "Valois":"Valois",             "Bourbons":"Bourbons", "Orléans":"Orléans",
+};
+
+// Données EN pour chaque roi (epithet / capital / desc / events)
+const KINGS_EN = {
+  1:  {epithet:"the Great",             capital:"Tournai then Paris",    desc:"First king of a united Frankish realm, he converted to Christianity after the Battle of Tolbiac, establishing the lasting alliance between the Church and Frankish royalty.",               events:"Battle of Soissons (486) · Baptism of Reims (498)"},
+  2:  {epithet:"the Old",               capital:"Soissons",              desc:"Last surviving son of Clovis, he briefly reunited the entire Frankish kingdom under his sole rule after eliminating his rivals.",                                                            events:"Reunification of the Frankish realm (558)"},
+  3:  {epithet:"the Great",             capital:"Paris",                 desc:"Considered the most powerful of the Merovingian kings, he unified the Frankish realm and was a great patron of the arts, notably the goldsmithery of Saint Eligius.",                       events:"Foundation of Saint-Denis Abbey (629)"},
+  4:  {epithet:"the Short",             capital:"Verberie",              desc:"Founder of the Carolingian dynasty, he deposed the last Merovingian and was anointed king by Pope Stephen II, establishing the principle of royal consecration.",                          events:"Donation of Pepin to the Pope (754)"},
+  5:  {epithet:"Father of Europe",      capital:"Aachen",                desc:"Crowned Emperor of the West on 25 December 800 by Pope Leo III, he unified much of Western Europe and sparked the Carolingian Renaissance of arts and letters.",                           events:"Imperial coronation (800) · Oath of Strasbourg"},
+  6:  {epithet:"the Pious",             capital:"Aachen",                desc:"Son and successor of Charlemagne, deeply devout but unable to prevent civil wars among his sons, he was forced to divide the empire several times.",                                       events:"Oath of Strasbourg (842)"},
+  7:  {epithet:"the Bald",              capital:"Paris",                 desc:"First king of France in the proper sense after the Treaty of Verdun (843), he was also crowned Emperor of the West in 875.",                                                               events:"Treaty of Verdun (843)"},
+  8:  {epithet:"the Stammerer",         capital:"Compiègne",             desc:"A king with a very short reign, he was forced to grant many privileges to the lords and the Church to secure their support.",                                                              events:"Capitulary of Quierzy (877)"},
+  9:  {epithet:"the Simple",            capital:"Laon",                  desc:"He ceded Normandy to the Vikings in 911 through the Treaty of Saint-Clair-sur-Epte, granting these lands to Rollo in exchange for his submission.",                                        events:"Treaty of Saint-Clair-sur-Epte (911)"},
+  10: {epithet:"the Defender",          capital:"Paris",                 desc:"Hero of the Siege of Paris against the Vikings (885–886), he was the first non-Carolingian king, elected by the great lords of the realm for his military prestige.",                      events:"Siege of Paris by the Vikings (885–886)"},
+  11: {epithet:"the Founder",           capital:"Paris",                 desc:"Founder of the longest dynasty in world monarchical history, he was elected king by the great lords after the death of the last Carolingian.",                                             events:"Royal election (987) · End of the Carolingians"},
+  12: {epithet:"the Pious",             capital:"Paris",                 desc:"Renowned for his piety and charity, he was excommunicated for marrying his cousin Bertha of Burgundy, before submitting to Rome.",                                                         events:"Papal excommunication (998)"},
+  13: {epithet:"",                      capital:"Paris",                 desc:"His reign was marked by many conflicts with his vassals, notably William the Conqueror, Duke of Normandy and future king of England.",                                                     events:"Defeat at Val-ès-Dunes (1047)"},
+  14: {epithet:"",                      capital:"Paris",                 desc:"Excommunicated by the Pope for his remarriage, he did not participate in the First Crusade but strengthened the Capetian royal domain.",                                                   events:"First Crusade (1095) without the king"},
+  15: {epithet:"the Fat",               capital:"Paris",                 desc:"A tireless warrior, he consolidated royal authority in the royal domain and relied on Abbot Suger to administer the kingdom.",                                                             events:"Battle of Brémule (1119)"},
+  16: {epithet:"the Young",             capital:"Paris",                 desc:"Husband of Eleanor of Aquitaine whom he repudiated, losing her to Henry II Plantagenet; he participated in the disastrous Second Crusade.",                                                events:"Divorce from Eleanor (1152) · 2nd Crusade (1147)"},
+  17: {epithet:"Augustus",              capital:"Paris",                 desc:"He triumphed at Bouvines (1214), recovered Normandy from England and doubled the royal domain, becoming the most powerful monarch in the West.",                                           events:"Battle of Bouvines (1214) · 3rd Crusade"},
+  18: {epithet:"the Lion",              capital:"Paris",                 desc:"A reign of only three years, but he led the Crusade against the Cathars and conquered Poitou and part of Gascony from England.",                                                          events:"Albigensian Crusade (1226)"},
+  19: {epithet:"Saint Louis",           capital:"Paris",                 desc:"Canonised in 1297, he embodied the ideal of the Christian king. He led two crusades, built the Sainte-Chapelle and consolidated royal justice.",                                           events:"Sainte-Chapelle (1248) · 7th Crusade · Death at Tunis (1270)"},
+  20: {epithet:"the Bold",              capital:"Paris",                 desc:"Son of Saint Louis, he considerably enlarged the royal domain through inheritances and acquisitions, notably the County of Toulouse.",                                                     events:"Sicilian Vespers (1282)"},
+  21: {epithet:"the Fair",              capital:"Paris",                 desc:"An authoritarian and reforming king, he clashed with Pope Boniface VIII, suppressed the Knights Templar (1307) and convened the first Estates General.",                                   events:"Suppression of the Templars (1307) · Estates General (1302)"},
+  22: {epithet:"the Quarreler",         capital:"Paris",                 desc:"An irascible king, he died after only two years of reign. He was the first king to abolish serfdom in France.",                                                                           events:"Abolition of serfdom (1315)"},
+  23: {epithet:"the Tall",              capital:"Paris",                 desc:"First king to invoke Salic law to exclude women from the throne, he reorganised royal administration and unified weights and measures.",                                                   events:"Application of Salic law"},
+  24: {epithet:"the Fair",              capital:"Paris",                 desc:"The last direct Capetian, his death without a male heir triggered the succession of Philip VI of Valois and ultimately sparked the Hundred Years' War.",                                  events:"End of the direct Capetians (1328)"},
+  25: {epithet:"of Valois",             capital:"Paris",                 desc:"First Valois king, his reign was marked by the defeat at Crécy (1346) and the devastation of the Black Death, which killed a third of the population.",                                   events:"Battle of Crécy (1346) · Black Death (1347)"},
+  26: {epithet:"the Good",              capital:"Paris",                 desc:"Captured at Poitiers (1356), he was forced to sign the Treaty of Brétigny ceding a third of France to England. He died in captivity in London.",                                          events:"Battle of Poitiers (1356) · Captivity in London"},
+  27: {epithet:"the Wise",              capital:"Paris",                 desc:"A learned and shrewd sovereign, he reconquered most of the lost territories with Du Guesclin and created the Royal Library.",                                                              events:"Reconquest of Poitou (1372) · Royal Library"},
+  28: {epithet:"the Mad",               capital:"Paris",                 desc:"Stricken with severe mental illness from 1392, his reign descended into civil war between the Armagnacs and Burgundians, enabling the English reconquest.",                               events:"Defeat at Agincourt (1415) · Treaty of Troyes (1420)"},
+  29: {epithet:"the Victorious",        capital:"Bourges then Paris",    desc:"Rescued by Joan of Arc who secured his coronation at Reims (1429), he finally expelled the English and ended the Hundred Years' War in 1453.",                                            events:"Joan of Arc (1429) · End of Hundred Years' War (1453)"},
+  30: {epithet:"the Universal Spider",  capital:"Plessis-lès-Tours",     desc:"A politically shrewd 'spider king', he defeated the League of the Public Weal and incorporated Burgundy into France after the death of Charles the Bold.",                               events:"Death of Charles the Bold (1477) · Annexation of Burgundy"},
+  31: {epithet:"the Affable",           capital:"Paris",                 desc:"He launched the Italian Wars (1494) to claim Naples, introducing Renaissance art to France. He died from a freak accident at age 27.",                                                    events:"Start of Italian Wars (1494) · Anne of Brittany"},
+  32: {epithet:"Father of the People",  capital:"Blois",                 desc:"Nicknamed 'Father of the People' for his moderate taxation, he pursued the Italian Wars but had to abandon them. His reign was prosperous and popular.",                                  events:"Italian Wars · Annexation of Brittany"},
+  33: {epithet:"the Knight King",       capital:"Paris / Fontainebleau", desc:"Symbol of the French Renaissance, he triumphed at Marignano (1515), founded the Collège de France, built Chambord and brought Leonardo da Vinci to France.",                            events:"Battle of Marignano (1515) · Leonardo da Vinci (1516)"},
+  34: {epithet:"",                      capital:"Paris",                 desc:"Husband of Catherine de' Medici, he recovered Metz, Toul and Verdun from the Empire. He died tragically during a jousting tournament, struck by a lance splinter in the eye.",            events:"Peace of Cateau-Cambrésis (1559) · Death in joust"},
+  35: {epithet:"",                      capital:"Paris",                 desc:"Under the regency of his mother Catherine de' Medici, his reign was marked by the Wars of Religion and the terrible St. Bartholomew's Day Massacre (1572).",                             events:"St. Bartholomew's Day Massacre (24 Aug 1572)"},
+  36: {epithet:"",                      capital:"Paris",                 desc:"Last of the Valois, he had the Guises assassinated and was himself stabbed by the monk Jacques Clément. He designated Henry of Navarre as his successor.",                               events:"Assassination of the Guises (1588) · Assassination of the king (1589)"},
+  37: {epithet:"the Great / Good King", capital:"Paris",                 desc:"First Bourbon king, he ended the Wars of Religion with the Edict of Nantes (1598). Popular and pragmatic, he was assassinated by Ravaillac in 1610.",                                   events:"Edict of Nantes (1598) · Assassination by Ravaillac (1610)"},
+  38: {epithet:"the Just",              capital:"Paris",                 desc:"His reign was dominated by Cardinal Richelieu, who affirmed absolute royal power, suppressed the Protestant strongholds and steered France into the Thirty Years' War.",                  events:"Siege of La Rochelle (1628) · Richelieu as Chief Minister"},
+  39: {epithet:"the Sun King",          capital:"Versailles",            desc:"The longest reign in French history (72 years). He embodied absolute monarchy, built Versailles and revoked the Edict of Nantes in 1685.",                                               events:"Building of Versailles · Revocation of Edict of Nantes (1685)"},
+  40: {epithet:"the Beloved",           capital:"Versailles",            desc:"Initially 'the Beloved', he ended up unpopular. He lost Canada to the English but acquired Lorraine and Corsica.",                                                                        events:"Loss of Canada (1763) · Acquisition of Corsica (1768)"},
+  41: {epithet:"",                      capital:"Versailles then Paris", desc:"A reforming but indecisive monarch, he convened the Estates General facing a financial crisis. The Revolution broke out in 1789 and he was guillotined on 21 January 1793.",             events:"French Revolution (1789) · Execution (21 Jan 1793)"},
+  42: {epithet:"",                      capital:"Paris",                 desc:"Brother of Louis XVI, he reigned after the fall of Napoleon. A pragmatic constitutional monarch, he accepted the Charter of 1814 guaranteeing fundamental liberties.",                   events:"Restoration (1814) · Constitutional Charter (1814)"},
+  43: {epithet:"",                      capital:"Paris",                 desc:"The last Bourbon king, an ultra-royalist, his July Ordinances of 1830 triggered the Three Glorious Days revolution which forced him to abdicate and go into exile.",                     events:"The Three Glorious Days (27–29 July 1830)"},
+  44: {epithet:"the Citizen King",      capital:"Paris",                 desc:"Last king of the French (not 'of France'), he reigned during the July Monarchy. The Revolution of 1848 ended his reign and established the Second Republic.",                            events:"Conquest of Algeria (1830) · Revolution of 1848"},
+};
+
+// ══════════════════════════════════════════════
+//  UI STATE
 // ══════════════════════════════════════════════
 let activeDynasty = "Tous";
 let searchQuery   = "";
 
 function buildFilters() {
+  const t = I18N[lang];
   const dynasties = ["Tous", ...new Set(KINGS.map(k => k.dynasty))];
   const c = document.getElementById("dynastyFilters");
   c.innerHTML = "";
@@ -594,7 +693,8 @@ function buildFilters() {
     const p = document.createElement("button");
     p.className = "pill" + (d==="Tous"?" all":"") + (d===activeDynasty?" active":"");
     if (d !== "Tous") p.dataset.dyn = d;
-    p.textContent = d;
+    // label selon langue
+    p.textContent = d === "Tous" ? t.all : (lang==="en" ? (DYNASTY_EN[d]||d) : d);
     p.onclick = () => { activeDynasty = d; buildFilters(); renderList(); };
     c.appendChild(p);
   });
@@ -603,23 +703,27 @@ function buildFilters() {
 function norm(s) { return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
 
 function renderList() {
+  const t    = I18N[lang];
   const list = document.getElementById("kingsList");
-  const q = norm(searchQuery).trim();
+  const q    = norm(searchQuery).trim();
 
   const filtered = KINGS.filter(k => {
     if (activeDynasty !== "Tous" && k.dynasty !== activeDynasty) return false;
-    if (q) return norm(k.name + " " + k.epithet).includes(q);
+    if (q) {
+      const en = KINGS_EN[k.id] || {};
+      return norm(k.name + " " + k.epithet + " " + (en.epithet||"")).includes(q);
+    }
     return true;
   });
 
   document.getElementById("countBar").textContent =
     filtered.length === KINGS.length
-      ? `${KINGS.length} souverains · de Clovis Ier à Louis-Philippe Ier`
-      : `${filtered.length} résultat${filtered.length > 1 ? "s" : ""}`;
+      ? t.sovereigns(KINGS.length)
+      : t.results(filtered.length);
 
   list.innerHTML = "";
   if (!filtered.length) {
-    list.innerHTML = `<div class="empty"><span>👑</span>Aucun roi trouvé</div>`;
+    list.innerHTML = `<div class="empty"><span>👑</span>${t.empty}</div>`;
     return;
   }
 
@@ -630,7 +734,8 @@ function renderList() {
     Object.entries(groups).forEach(([dyn, kings]) => {
       const sec = document.createElement("div");
       sec.className = "dynasty-section";
-      sec.innerHTML = `<div class="dynasty-header"><div class="dynasty-line"></div><span class="dynasty-label">${dyn}</span><div class="dynasty-line"></div></div>`;
+      const dynLabel = lang==="en" ? (DYNASTY_EN[dyn]||dyn) : dyn;
+      sec.innerHTML = `<div class="dynasty-header"><div class="dynasty-line"></div><span class="dynasty-label">${dynLabel}</span><div class="dynasty-line"></div></div>`;
       kings.forEach((k,i) => sec.appendChild(buildCard(k,i)));
       list.appendChild(sec);
     });
@@ -640,6 +745,10 @@ function renderList() {
 }
 
 function buildCard(k, idx) {
+  const t   = I18N[lang];
+  const en  = KINGS_EN[k.id] || {};
+  const epithet = lang==="en" ? (en.epithet||k.epithet) : k.epithet;
+
   const card = document.createElement("div");
   card.className = "king-card";
   card.dataset.dyn = k.dynasty;
@@ -652,10 +761,10 @@ function buildCard(k, idx) {
       <img alt="${k.name}" loading="lazy">
     </div>
     <div class="king-info">
-      <div class="king-num">Nº ${k.id}</div>
+      <div class="king-num">${t.num} ${k.id}</div>
       <div class="king-name">${k.name}</div>
-      ${k.epithet ? `<div class="king-epithet">${k.epithet}</div>` : ""}
-      <div class="king-reign"><span>${k.start} – ${k.end}</span> &nbsp;·&nbsp; ${dur} an${dur>1?"s":""}</div>
+      ${epithet ? `<div class="king-epithet">${epithet}</div>` : ""}
+      <div class="king-reign"><span>${k.start} – ${k.end}</span> &nbsp;·&nbsp; ${t.years(dur)}</div>
     </div>
     <div class="king-arrow">›</div>
   `;
@@ -666,8 +775,16 @@ function buildCard(k, idx) {
 }
 
 function openModal(k) {
-  const dc = DYNASTY_COLORS[k.dynasty] || DYNASTY_COLORS["Capétiens"];
+  const t   = I18N[lang];
+  const en  = KINGS_EN[k.id] || {};
+  const dc  = DYNASTY_COLORS[k.dynasty] || DYNASTY_COLORS["Capétiens"];
   const dur = k.end - k.start;
+
+  const epithet  = lang==="en" ? (en.epithet ||k.epithet)  : k.epithet;
+  const capital  = lang==="en" ? (en.capital ||k.capital)  : k.capital;
+  const desc     = lang==="en" ? (en.desc    ||k.desc)     : k.desc;
+  const events   = lang==="en" ? (en.events  ||k.events)   : k.events;
+  const dynLabel = lang==="en" ? (DYNASTY_EN[k.dynasty]||k.dynasty) : k.dynasty;
 
   document.getElementById("modalContent").innerHTML = `
     <div class="modal-portrait-wrap">
@@ -676,22 +793,21 @@ function openModal(k) {
       <img id="mImg" alt="${k.name}">
     </div>
     <div class="modal-body">
-      <div class="modal-dynasty-badge" style="background:${dc.bg};border-color:${dc.border};color:${dc.text};">${k.dynasty}</div>
+      <div class="modal-dynasty-badge" style="background:${dc.bg};border-color:${dc.border};color:${dc.text};">${dynLabel}</div>
       <div class="modal-name">${k.name}</div>
-      ${k.epithet ? `<div class="modal-epithet">${k.epithet}</div>` : `<div style="margin-bottom:16px"></div>`}
+      ${epithet ? `<div class="modal-epithet">${epithet}</div>` : `<div style="margin-bottom:16px"></div>`}
       <div class="modal-stats">
-        <div class="stat-box"><div class="stat-label">Début de règne</div><div class="stat-value">${k.start}</div></div>
-        <div class="stat-box"><div class="stat-label">Fin de règne</div><div class="stat-value">${k.end}</div></div>
-        <div class="stat-box"><div class="stat-label">Durée</div><div class="stat-value">${dur} an${dur>1?"s":""}</div></div>
-        <div class="stat-box"><div class="stat-label">Capitale</div><div class="stat-value" style="font-size:13px">${k.capital||"—"}</div></div>
+        <div class="stat-box"><div class="stat-label">${t.reignStart}</div><div class="stat-value">${k.start}</div></div>
+        <div class="stat-box"><div class="stat-label">${t.reignEnd}</div><div class="stat-value">${k.end}</div></div>
+        <div class="stat-box"><div class="stat-label">${t.duration}</div><div class="stat-value">${t.years(dur)}</div></div>
+        <div class="stat-box"><div class="stat-label">${t.capital}</div><div class="stat-value" style="font-size:13px">${capital||"—"}</div></div>
       </div>
-      ${k.desc  ? `<p class="modal-desc">${k.desc}</p>` : ""}
-      ${k.events? `<div class="stat-box" style="margin-bottom:16px"><div class="stat-label">Événements clés</div><div class="stat-value" style="font-size:13px;line-height:1.6">${k.events}</div></div>` : ""}
-      <button class="modal-close" onclick="closeModal()">⚜ Fermer ⚜</button>
+      ${desc   ? `<p class="modal-desc">${desc}</p>` : ""}
+      ${events ? `<div class="stat-box" style="margin-bottom:16px"><div class="stat-label">${t.keyEvents}</div><div class="stat-value" style="font-size:13px;line-height:1.6">${events}</div></div>` : ""}
+      <button class="modal-close" onclick="closeModal()">${t.close}</button>
     </div>
   `;
 
-  // Load portrait for modal
   getWikiImg(k.wikiTitle).then(url => {
     const spinner = document.getElementById("mSpinner");
     const ph      = document.getElementById("mPh");
@@ -733,8 +849,39 @@ function openAppStore(appId) {
   window.location.href = `https://apps.apple.com/fr/app/${appId}`;
 }
 
+// ── LANGUE ──
+function toggleLang() {
+  lang = lang === "fr" ? "en" : "fr";
+  updateUI();
+  buildFilters();
+  renderList();
+}
+
+function updateUI() {
+  const t = I18N[lang];
+  // Header
+  document.getElementById("btnLang").textContent      = lang === "fr" ? "🇫🇷" : "🇬🇧";
+  document.getElementById("appTitle").textContent     = t.title;
+  document.getElementById("appSubtitle").textContent  = t.subtitle;
+  document.getElementById("searchInput").placeholder  = t.placeholder;
+  // Settings
+  document.getElementById("settingsAppName").textContent   = t.title;
+  document.getElementById("settingsVersion").textContent   = t.version;
+  document.getElementById("settingsSectionTitle").textContent = t.otherApps;
+  document.getElementById("descCimetieres").textContent    = t.descCimetieres;
+  document.getElementById("descMusees").textContent        = t.descMusees;
+  document.getElementById("descRestaurants").textContent   = t.descRestaurants;
+  document.getElementById("descCave").textContent          = t.descCave;
+  document.getElementById("descMedi").textContent          = t.descMedi;
+  document.getElementById("descFrigo").textContent         = t.descFrigo;
+  document.getElementById("settingsCopyright").innerHTML   = t.copyright;
+  document.getElementById("settingsClaudeBadge").innerHTML = t.madeWith;
+  document.getElementById("settingsCloseBtn").textContent  = t.closeBtn;
+}
+
 buildFilters();
 renderList();
+updateUI();
 </script>
 </body>
 </html>
